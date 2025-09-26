@@ -1,0 +1,86 @@
+Game Log
+Size: 3x3
+P1=X, P2=O
+
+Move 1: Player 1 (X) at 0,0
+Board state:
+  0 1 2 
+0|X| | |
+----------
+1| | | |
+----------
+2| | | |
+
+Move 2: Player 2 (O) at 1,0
+Board state:
+  0 1 2 
+0|X| | |
+----------
+1|O| | |
+----------
+2| | | |
+
+Move 3: Player 1 (X) at 1,2
+Board state:
+  0 1 2 
+0|X| | |
+----------
+1|O| |X|
+----------
+2| | | |
+
+Move 4: Player 2 (O) at 1,1
+Board state:
+  0 1 2 
+0|X| | |
+----------
+1|O|O|X|
+----------
+2| | | |
+
+Move 5: Player 1 (X) at 2,2
+Board state:
+  0 1 2 
+0|X| | |
+----------
+1|O|O|X|
+----------
+2| | |X|
+
+Move 6: Player 2 (O) at 2,1
+Board state:
+  0 1 2 
+0|X| | |
+----------
+1|O|O|X|
+----------
+2| |O|X|
+
+Move 7: Player 1 (X) at 2,0
+Board state:
+  0 1 2 
+0|X| | |
+----------
+1|O|O|X|
+----------
+2|X|O|X|
+
+Move 8: Player 2 (O) at 0,2
+Board state:
+  0 1 2 
+0|X| |O|
+----------
+1|O|O|X|
+----------
+2|X|O|X|
+
+Move 9: Player 1 (X) at 0,1
+Board state:
+  0 1 2 
+0|X|X|O|
+----------
+1|O|O|X|
+----------
+2|X|O|X|
+
+Draw!

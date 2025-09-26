@@ -26,6 +26,10 @@ C programming assignment for SE1012 - Modular Tic-Tac-Toe game with dynamic memo
 ##------------------PART 1 OF THE GAME COMPLETED----------------------##
 
 ##Progress in Third Commit
+- `logMove()` → Records the entire board for each move of the player during a game to game_log.txt file in the game directory
+- Added proper comments for the previous code 
+- Removed the header files in the main program and made a seperate tictactoe.h file for the header
+
 
 
 

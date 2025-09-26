@@ -1,17 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
+/*
+ * Tic-Tac-Toe Game
+ * Customizable board size (3x3 to 10x10)
+ * Logs all moves to game_log.txt
+ */
 
-// Function declarations
-void initializeBoard(char **board, int size);
-void displayBoard(char **board, int size);
-int BoardSize();
-int MoveValidity(char **board, int size, int row, int col);
-void makeMove(char **board, int size, int row, int col, char player);
-int conditionWin(char **board, int size, char player);
-int conditionDraw(char **board, int size);
-void logMove(FILE *logFile, int moveNumber, int player, int row, int col);
-void playGame(char **board, int size);
-void instruct();
+#include "tictactoe.h"
 
 int main() {
     int n;
@@ -23,6 +16,7 @@ int main() {
     n = BoardSize();
     printf("Board Size: %dx%d\n", n, n);
 
+    // Allocate memory for 2D board
     board = malloc(n * sizeof(char *));
     for (i = 0; i < n; i++) {
         board[i] = malloc(n * sizeof(char));
@@ -31,6 +25,7 @@ int main() {
     initializeBoard(board, n);
     playGame(board, n);
 
+    // Free memory
     for (i = 0; i < n; i++) {
         free(board[i]);
     }
@@ -40,7 +35,9 @@ int main() {
     return 0;
 }
 
-// initializing board
+/*
+ * Initialize board with empty spaces
+ */
 void initializeBoard(char **board, int size) {
     int i, j;
     for (i = 0; i < size; i++) {
@@ -49,15 +46,20 @@ void initializeBoard(char **board, int size) {
         }
     }
 }
-// show board
+/*
+ * Display the current board state
+ */
 void displayBoard(char **board, int size) {
     int i, j;
+    
+    // Print column numbers
     printf("  ");
     for (j = 0; j < size; j++) {
         printf("%d ", j);
     }
     printf("\n");
 
+    // Print rows with separators
     for (i = 0; i < size; i++) {
         printf("%d", i);
         for (j = 0; j < size; j++) {
@@ -66,7 +68,6 @@ void displayBoard(char **board, int size) {
         printf("|\n");
 
         if (i < size - 1) {
-        
             for (j = 0; j < size; j++) {
                 printf("---");
             }
@@ -75,7 +76,9 @@ void displayBoard(char **board, int size) {
     }
 }
 
-// get board size
+/*
+ * Get board size from user (3-10)
+ */
 int BoardSize() {
     int n;
     printf("Enter board size (3-10): ");
@@ -86,27 +89,35 @@ int BoardSize() {
     }
     return n;
 }
-// check move
+/*
+ * Check if move is valid (in bounds and empty)
+ */
 int MoveValidity(char **board, int size, int row, int col) {
+    // Check bounds
     if (row < 0 || row >= size || col < 0 || col >= size) {
         return 0;
     }
+    // Check if cell is empty
     if (board[row][col] != ' ') {
         return 0;
     }
     return 1;
 }
 
-// making move
+/*
+ * Place player's mark on the board
+ */
 void makeMove(char **board, int size, int row, int col, char player) {
     board[row][col] = player;
 }
 
-// check win
+/*
+ * Check if player has won (N in a row/column/diagonal)
+ */
 int conditionWin(char **board, int size, char player) {
     int i, j, count;
     
-    // rows
+    // Check rows
     for (i = 0; i < size; i++) {
         count = 0;
         for (j = 0; j < size; j++) {
@@ -115,7 +126,7 @@ int conditionWin(char **board, int size, char player) {
         if (count == size) return 1;
     }
     
-    // columns
+    // Check columns
     for (j = 0; j < size; j++) {
         count = 0;
         for (i = 0; i < size; i++) {
@@ -124,14 +135,14 @@ int conditionWin(char **board, int size, char player) {
         if (count == size) return 1;
     }
     
-    // diagonal 1
+    // Check main diagonal
     count = 0;
     for (i = 0; i < size; i++) {
         if (board[i][i] == player) count++;
     }
     if (count == size) return 1;
     
-    // diagonal 2
+    // Check anti-diagonal
     count = 0;
     for (i = 0; i < size; i++) {
         if (board[i][size-1-i] == player) count++;
@@ -141,7 +152,9 @@ int conditionWin(char **board, int size, char player) {
     return 0;
 }
 
-// check draw
+/*
+ * Check if game is a draw (board full)
+ */
 int conditionDraw(char **board, int size) {
     int i, j;
     for (i = 0; i < size; i++) {
@@ -152,13 +165,41 @@ int conditionDraw(char **board, int size) {
     return 1;
 }
 
-// log move
-void logMove(FILE *logFile, int moveNumber, int player, int row, int col) {
+/*
+ * Log move and board state to file
+ */
+void logMove(FILE *logFile, int moveNumber, int player, int row, int col, char **board, int size) {
     fprintf(logFile, "Move %d: Player %d (%c) at %d,%d\n", 
             moveNumber, player, (player == 1) ? 'X' : 'O', row, col);
+    
+    // Print board state
+    fprintf(logFile, "Board state:\n");
+    fprintf(logFile, "  ");
+    for (int j = 0; j < size; j++) {
+        fprintf(logFile, "%d ", j);
+    }
+    fprintf(logFile, "\n");
+
+    for (int i = 0; i < size; i++) {
+        fprintf(logFile, "%d", i);
+        for (int j = 0; j < size; j++) {
+            fprintf(logFile, "|%c", board[i][j]);
+        }
+        fprintf(logFile, "|\n");
+
+        if (i < size - 1) {
+            for (int j = 0; j < size; j++) {
+                fprintf(logFile, "---");
+            }
+            fprintf(logFile, "-\n");
+        }
+    }
+    fprintf(logFile, "\n");
 }
 
-// instructions
+/*
+ * Display game instructions
+ */
 void instruct() {
     printf("========================================\n");
     printf("        WELCOME TO TIC-TAC-TOE!\n");
@@ -173,7 +214,9 @@ void instruct() {
     printf("========================================\n\n");
 }
 
-// game loop
+/*
+ * Main game loop
+ */
 void playGame(char **board, int size) {
     FILE *fp = fopen("game_log.txt", "w");
     if (fp == NULL) {
@@ -199,7 +242,7 @@ void playGame(char **board, int size) {
         
         if (MoveValidity(board, size, row, col)) {
             makeMove(board, size, row, col, (player == 1) ? 'X' : 'O');
-            logMove(fp, move, player, row, col);
+            logMove(fp, move, player, row, col, board, size);
             
             if (conditionWin(board, size, (player == 1) ? 'X' : 'O')) {
                 printf("\nFinal Board:\n");
@@ -221,7 +264,7 @@ void playGame(char **board, int size) {
             }
         }
         else {
-            // Check what type of invalid move
+            // Handle invalid moves
             if (row < 0 || row >= size || col < 0 || col >= size) {
                 printf("Error: Move out of bounds! Enter row and column between 0 and %d\n", size-1);
             }
