@@ -10,11 +10,14 @@ int main() {
     int n;
     char **board;
     int i;
+    int gameMode;
 
     instruct();
     
     n = BoardSize();
     printf("Board Size: %dx%d\n", n, n);
+    
+    gameMode = selectGameMode();
 
     // Allocate memory for 2D board
     board = malloc(n * sizeof(char *));
@@ -23,7 +26,7 @@ int main() {
     }
 
     initializeBoard(board, n);
-    playGame(board, n);
+    playGame(board, n, gameMode);
 
     // Free memory
     for (i = 0; i < n; i++) {
@@ -215,9 +218,75 @@ void instruct() {
 }
 
 /*
+ * Select game mode (Two Players or User vs Computer)
+ */
+int selectGameMode() {
+    int choice;
+    printf("Select Game Mode:\n");
+    printf("1. Two Players (User vs User)\n");
+    printf("2. User vs Computer\n");
+    printf("Enter your choice (1 or 2): ");
+    scanf("%d", &choice);
+    
+    while (choice != 1 && choice != 2) {
+        printf("Invalid choice! Please enter 1 or 2: ");
+        scanf("%d", &choice);
+    }
+    
+    if (choice == 1) {
+        printf("Selected: Two Players (User vs User)\n");
+    } else {
+        printf("Selected: User vs Computer\n");
+    }
+    
+    return choice;
+}
+
+/*
+ * Generate random computer move
+ */
+void generateComputerMove(char **board, int size, int *row, int *col) {
+    int validMoves = 0;
+    int i, j;
+    
+    // Count valid moves
+    for (i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            if (board[i][j] == ' ') {
+                validMoves++;
+            }
+        }
+    }
+    
+    if (validMoves == 0) {
+        *row = -1;
+        *col = -1;
+        return;
+    }
+    
+    // Generate random number between 1 and validMoves
+    int randomMove = (rand() % validMoves) + 1;
+    
+    // Find the randomMove-th valid position
+    int currentMove = 0;
+    for (i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            if (board[i][j] == ' ') {
+                currentMove++;
+                if (currentMove == randomMove) {
+                    *row = i;
+                    *col = j;
+                    return;
+                }
+            }
+        }
+    }
+}
+
+/*
  * Main game loop
  */
-void playGame(char **board, int size) {
+void playGame(char **board, int size, int gameMode) {
     FILE *fp = fopen("game_log.txt", "w");
     if (fp == NULL) {
         printf("Error opening file\n");
@@ -226,19 +295,36 @@ void playGame(char **board, int size) {
     
     fprintf(fp, "Game Log\n");
     fprintf(fp, "Size: %dx%d\n", size, size);
-    fprintf(fp, "P1=X, P2=O\n\n");
+    if (gameMode == 1) {
+        fprintf(fp, "Mode: Two Players (User vs User)\n");
+        fprintf(fp, "P1=X, P2=O\n\n");
+    } else {
+        fprintf(fp, "Mode: User vs Computer\n");
+        fprintf(fp, "User=X, Computer=O\n\n");
+    }
     
     int player = 1;
     int move = 1;
     int done = 0;
     int row, col;
     
+    // Initialize random seed for computer moves
+    srand(time(NULL));
+    
     while (!done) {
         printf("\nBoard:\n");
         displayBoard(board, size);
         
-        printf("\nPlayer %d (%c), enter your move (row column): ", player, (player == 1) ? 'X' : 'O');
-        scanf("%d %d", &row, &col);
+        if (gameMode == 1 || player == 1) {
+            // Human player move
+            printf("\nPlayer %d (%c), enter your move (row column): ", player, (player == 1) ? 'X' : 'O');
+            scanf("%d %d", &row, &col);
+        } else {
+            // Computer move
+            printf("\nComputer (%c) is thinking...\n", 'O');
+            generateComputerMove(board, size, &row, &col);
+            printf("Computer chooses: %d %d\n", row, col);
+        }
         
         if (MoveValidity(board, size, row, col)) {
             makeMove(board, size, row, col, (player == 1) ? 'X' : 'O');
@@ -247,8 +333,18 @@ void playGame(char **board, int size) {
             if (conditionWin(board, size, (player == 1) ? 'X' : 'O')) {
                 printf("\nFinal Board:\n");
                 displayBoard(board, size);
-                printf("\nPlayer %d wins!\n", player);
-                fprintf(fp, "Player %d wins!\n", player);
+                if (gameMode == 1) {
+                    printf("\nPlayer %d wins!\n", player);
+                    fprintf(fp, "Player %d wins!\n", player);
+                } else {
+                    if (player == 1) {
+                        printf("\nYou win!\n");
+                        fprintf(fp, "User wins!\n");
+                    } else {
+                        printf("\nComputer wins!\n");
+                        fprintf(fp, "Computer wins!\n");
+                    }
+                }
                 done = 1;
             }
             else if (conditionDraw(board, size)) {
@@ -264,15 +360,17 @@ void playGame(char **board, int size) {
             }
         }
         else {
-            // Handle invalid moves
-            if (row < 0 || row >= size || col < 0 || col >= size) {
-                printf("Error: Move out of bounds! Enter row and column between 0 and %d\n", size-1);
+            // Handle invalid moves (only for human players)
+            if (gameMode == 1 || player == 1) {
+                if (row < 0 || row >= size || col < 0 || col >= size) {
+                    printf("Error: Move out of bounds! Enter row and column between 0 and %d\n", size-1);
+                }
+                else if (board[row][col] != ' ') {
+                    printf("Error: Cell already occupied! Choose an empty cell\n");
+                }
+                
+                printf("Try again!\n");
             }
-            else if (board[row][col] != ' ') {
-                printf("Error: Cell already occupied! Choose an empty cell\n");
-            }
-            
-            printf("Try again!\n");
         }
     }
     
